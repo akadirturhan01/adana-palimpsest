@@ -1,0 +1,1715 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kentsel Palimpsest: Adana — Kayıp Hafızanın İzinde</title>
+    <meta name="description" content="Adana'nın kayıp kentsel hafızasını keşfedin. Siber-flâneur olarak kentin katmanları arasında yürüyün, hafıza kartlarını toplayın ve kendi bellek haritanızı inşa edin.">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600;700&family=Caveat:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================ */
+        /*  CSS DESIGN SYSTEM — DARK MATTER AESTHETIC   */
+        /* ============================================ */
+        :root {
+            --bg-void: #0a0a0f;
+            --bg-deep: #0d0d14;
+            --bg-panel: rgba(15, 15, 25, 0.85);
+            --bg-glass: rgba(20, 20, 35, 0.65);
+            --bg-glass-hover: rgba(30, 30, 50, 0.75);
+            
+            --amber-glow: #d4a853;
+            --amber-bright: #f0c75e;
+            --amber-dim: #8a6d2b;
+            --amber-spark: #ffe4a0;
+            
+            --cyan-glow: #4ecdc4;
+            --cyan-dim: #2a7a74;
+            
+            --red-ember: #e74c3c;
+            --red-dim: #8b2e24;
+            
+            --purple-mist: #9b59b6;
+            --purple-dim: #5b3370;
+            
+            --text-primary: #e8e0d0;
+            --text-secondary: #a09888;
+            --text-dim: #6a6050;
+            --text-highlight: #fff8e7;
+            
+            --border-subtle: rgba(212, 168, 83, 0.15);
+            --border-glow: rgba(212, 168, 83, 0.4);
+            
+            --shadow-deep: 0 8px 32px rgba(0, 0, 0, 0.6);
+            --shadow-glow: 0 0 20px rgba(212, 168, 83, 0.15);
+            
+            --blur-glass: blur(16px);
+            --blur-heavy: blur(24px);
+            
+            --font-display: 'Cinzel', serif;
+            --font-body: 'Crimson Text', serif;
+            --font-ui: 'Inter', sans-serif;
+            --font-literary: 'Caveat', cursive;
+            
+            --z-map: 1;
+            --z-ui: 100;
+            --z-panel: 200;
+            --z-modal: 500;
+            --z-overlay: 900;
+            --z-intro: 1000;
+            
+            --transition-smooth: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            --transition-bounce: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        html, body {
+            width: 100%; height: 100%;
+            overflow: hidden;
+            background: var(--bg-void);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--amber-dim); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--amber-glow); }
+
+        /* ===== INTRO SCREEN ===== */
+        #intro-screen {
+            position: fixed; inset: 0;
+            z-index: var(--z-intro);
+            background: var(--bg-void);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            transition: opacity 1.2s ease, transform 1.2s ease;
+        }
+        #intro-screen.hidden {
+            opacity: 0; pointer-events: none;
+            transform: scale(1.05);
+        }
+        #intro-screen::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: 
+                radial-gradient(ellipse 600px 400px at 50% 40%, rgba(212,168,83,0.06) 0%, transparent 70%),
+                radial-gradient(ellipse 300px 300px at 30% 70%, rgba(78,205,196,0.04) 0%, transparent 60%),
+                radial-gradient(ellipse 250px 250px at 75% 60%, rgba(155,89,182,0.03) 0%, transparent 60%);
+        }
+
+        .intro-particles {
+            position: absolute; inset: 0;
+            overflow: hidden;
+        }
+        .intro-particle {
+            position: absolute;
+            width: 3px; height: 3px;
+            background: var(--amber-glow);
+            border-radius: 50%;
+            opacity: 0;
+            animation: floatParticle 8s infinite ease-in-out;
+        }
+
+        @keyframes floatParticle {
+            0% { opacity: 0; transform: translateY(100vh) scale(0); }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { opacity: 0; transform: translateY(-20vh) scale(1.5); }
+        }
+
+        .intro-content {
+            position: relative; z-index: 2;
+            text-align: center;
+            max-width: 700px; padding: 0 30px;
+        }
+        .intro-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            animation: pulse 3s infinite ease-in-out;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+        .intro-title {
+            font-family: var(--font-display);
+            font-size: 42px; font-weight: 900;
+            letter-spacing: 4px;
+            background: linear-gradient(135deg, var(--amber-glow), var(--amber-bright), var(--amber-glow));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+        .intro-subtitle {
+            font-family: var(--font-display);
+            font-size: 18px;
+            color: var(--text-secondary);
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+        }
+        .intro-desc {
+            font-family: var(--font-body);
+            font-size: 18px; line-height: 1.8;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+        }
+        .intro-quote {
+            font-family: var(--font-literary);
+            font-size: 22px;
+            color: var(--amber-dim);
+            font-style: italic;
+            margin: 25px 0 35px;
+            line-height: 1.5;
+        }
+        .intro-role-badge {
+            display: inline-flex; align-items: center; gap: 10px;
+            padding: 10px 25px;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-subtle);
+            border-radius: 30px;
+            font-family: var(--font-ui);
+            font-size: 13px; font-weight: 500;
+            color: var(--cyan-glow);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 35px;
+            backdrop-filter: var(--blur-glass);
+        }
+
+        #btn-start-game {
+            font-family: var(--font-display);
+            font-size: 16px; font-weight: 700;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            padding: 16px 50px;
+            background: linear-gradient(135deg, var(--amber-dim), var(--amber-glow));
+            color: var(--bg-void);
+            border: none; border-radius: 4px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+        }
+        #btn-start-game:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(212,168,83,0.4);
+        }
+        #btn-start-game::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+        #btn-start-game:hover::after { transform: translateX(100%); }
+
+        /* ===== MAP CONTAINER ===== */
+        #map {
+            position: absolute; inset: 0;
+            z-index: var(--z-map);
+        }
+
+        /* ===== TOP HUD BAR ===== */
+        #hud-bar {
+            position: fixed; top: 0; left: 0; right: 0;
+            z-index: var(--z-ui);
+            height: 60px;
+            background: var(--bg-panel);
+            backdrop-filter: var(--blur-glass);
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+        }
+        .hud-logo {
+            display: flex; align-items: center; gap: 12px;
+        }
+        .hud-logo-icon { font-size: 24px; }
+        .hud-logo-text {
+            font-family: var(--font-display);
+            font-size: 14px; font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--amber-glow);
+        }
+        .hud-stats {
+            display: flex; align-items: center; gap: 25px;
+        }
+        .hud-stat {
+            display: flex; align-items: center; gap: 8px;
+            font-family: var(--font-ui);
+            font-size: 13px; font-weight: 500;
+            color: var(--text-secondary);
+        }
+        .hud-stat-value {
+            color: var(--amber-bright);
+            font-weight: 700;
+            font-size: 16px;
+        }
+        .hud-actions {
+            display: flex; gap: 10px;
+        }
+        .hud-btn {
+            padding: 8px 16px;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-family: var(--font-ui);
+            font-size: 12px; font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: flex; align-items: center; gap: 6px;
+        }
+        .hud-btn:hover {
+            background: var(--bg-glass-hover);
+            border-color: var(--border-glow);
+            box-shadow: var(--shadow-glow);
+        }
+        .hud-btn.active {
+            border-color: var(--amber-glow);
+            color: var(--amber-bright);
+        }
+
+        /* ===== TIME SLIDER PANEL ===== */
+        #time-slider-panel {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            z-index: var(--z-ui);
+            padding: 15px 30px 20px;
+            background: var(--bg-panel);
+            backdrop-filter: var(--blur-glass);
+            border-top: 1px solid var(--border-subtle);
+        }
+        .time-slider-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 8px;
+        }
+        .time-slider-label {
+            font-family: var(--font-ui);
+            font-size: 11px; font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-dim);
+        }
+        .time-slider-year {
+            font-family: var(--font-display);
+            font-size: 28px; font-weight: 900;
+            color: var(--amber-bright);
+            text-shadow: 0 0 20px rgba(212,168,83,0.4);
+        }
+        .time-slider-era {
+            font-family: var(--font-body);
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        #time-slider {
+            width: 100%;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            background: linear-gradient(90deg, 
+                var(--amber-dim) 0%, 
+                var(--amber-glow) 50%, 
+                var(--cyan-glow) 100%
+            );
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+        }
+        #time-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px; height: 22px;
+            background: var(--amber-bright);
+            border-radius: 50%;
+            cursor: grab;
+            box-shadow: 0 0 15px rgba(212,168,83,0.6), 0 0 30px rgba(212,168,83,0.2);
+            transition: transform 0.2s;
+        }
+        #time-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.3);
+        }
+        .time-markers {
+            display: flex; justify-content: space-between;
+            margin-top: 6px;
+            font-family: var(--font-ui);
+            font-size: 10px;
+            color: var(--text-dim);
+        }
+
+        /* ===== LOCATION DETAIL PANEL ===== */
+        #location-panel {
+            position: fixed;
+            top: 70px; right: 15px;
+            width: 400px;
+            max-height: calc(100vh - 170px);
+            z-index: var(--z-panel);
+            background: var(--bg-panel);
+            backdrop-filter: var(--blur-heavy);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            overflow: hidden;
+            transform: translateX(450px);
+            opacity: 0;
+            transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                        opacity 0.4s ease;
+            box-shadow: var(--shadow-deep);
+        }
+        #location-panel.open {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        .loc-panel-scroll {
+            max-height: calc(100vh - 170px);
+            overflow-y: auto;
+            padding-bottom: 20px;
+        }
+        .loc-header {
+            position: relative;
+            padding: 25px 25px 20px;
+            background: linear-gradient(180deg, rgba(212,168,83,0.08) 0%, transparent 100%);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .loc-close {
+            position: absolute; top: 15px; right: 15px;
+            width: 30px; height: 30px;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-subtle);
+            border-radius: 50%;
+            color: var(--text-secondary);
+            font-size: 14px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: var(--transition-smooth);
+        }
+        .loc-close:hover {
+            background: var(--red-dim);
+            border-color: var(--red-ember);
+            color: #fff;
+        }
+        .loc-memory-type {
+            font-family: var(--font-ui);
+            font-size: 10px; font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            padding: 4px 12px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        .memory-type-social { background: rgba(78,205,196,0.15); color: var(--cyan-glow); }
+        .memory-type-economic { background: rgba(212,168,83,0.15); color: var(--amber-glow); }
+        .memory-type-industrial { background: rgba(231,76,60,0.15); color: var(--red-ember); }
+        .memory-type-spatial { background: rgba(155,89,182,0.15); color: var(--purple-mist); }
+        .memory-type-cultural { background: rgba(240,199,94,0.15); color: var(--amber-bright); }
+        .memory-type-migration { background: rgba(52,152,219,0.15); color: #3498db; }
+        .memory-type-agricultural { background: rgba(46,204,113,0.15); color: #2ecc71; }
+        .memory-type-modern { background: rgba(149,165,166,0.15); color: #95a5a6; }
+        .memory-type-socioeconomic { background: rgba(241,196,15,0.15); color: #f1c40f; }
+
+        .loc-title {
+            font-family: var(--font-display);
+            font-size: 20px; font-weight: 700;
+            color: var(--text-highlight);
+            margin-bottom: 5px;
+        }
+        .loc-period {
+            font-family: var(--font-ui);
+            font-size: 12px; color: var(--text-dim);
+        }
+        .loc-body { padding: 20px 25px; }
+        .loc-body h4 {
+            font-family: var(--font-ui);
+            font-size: 11px; font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            margin-bottom: 10px;
+            margin-top: 18px;
+        }
+        .loc-body h4:first-child { margin-top: 0; }
+        .loc-description {
+            font-family: var(--font-body);
+            font-size: 16px; line-height: 1.75;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        /* ===== NPC SECTION ===== */
+        .npc-section {
+            display: flex; align-items: flex-start; gap: 15px;
+            padding: 15px;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+        .npc-avatar {
+            width: 50px; height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--amber-dim), var(--amber-glow));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+        .npc-info { flex: 1; }
+        .npc-name {
+            font-family: var(--font-display);
+            font-size: 14px; font-weight: 700;
+            color: var(--amber-bright);
+            margin-bottom: 4px;
+        }
+        .npc-role {
+            font-family: var(--font-ui);
+            font-size: 11px; color: var(--text-dim);
+            margin-bottom: 8px;
+        }
+        .npc-dialogue {
+            font-family: var(--font-body);
+            font-size: 15px; line-height: 1.6;
+            color: var(--text-secondary);
+            font-style: italic;
+            border-left: 2px solid var(--amber-dim);
+            padding-left: 12px;
+        }
+
+        /* ===== DIALECTICAL IMAGE SECTION ===== */
+        .dialectical-section {
+            margin-top: 15px;
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .dialectical-header {
+            padding: 10px 15px;
+            background: rgba(231,76,60,0.08);
+            font-family: var(--font-ui);
+            font-size: 10px; font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--red-ember);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .dialectical-row {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: stretch;
+        }
+        .dialectical-past, .dialectical-present {
+            padding: 12px 15px;
+        }
+        .dialectical-past {
+            background: rgba(212,168,83,0.05);
+        }
+        .dialectical-present {
+            background: rgba(78,205,196,0.05);
+        }
+        .dialectical-label {
+            font-family: var(--font-ui);
+            font-size: 9px; font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        .dialectical-past .dialectical-label { color: var(--amber-dim); }
+        .dialectical-present .dialectical-label { color: var(--cyan-dim); }
+        .dialectical-text {
+            font-family: var(--font-body);
+            font-size: 13px; line-height: 1.5;
+            color: var(--text-secondary);
+        }
+        .dialectical-vs {
+            display: flex; align-items: center; justify-content: center;
+            width: 36px;
+            background: rgba(231,76,60,0.1);
+            font-family: var(--font-display);
+            font-size: 10px; font-weight: 700;
+            color: var(--red-ember);
+            letter-spacing: 1px;
+        }
+
+        /* ===== LITERARY CLUE ===== */
+        .literary-clue {
+            margin-top: 15px;
+            padding: 18px;
+            background: 
+                linear-gradient(135deg, rgba(212,168,83,0.06) 0%, rgba(155,89,182,0.04) 100%);
+            border: 1px solid rgba(212,168,83,0.12);
+            border-radius: 10px;
+            position: relative;
+        }
+        .literary-clue::before {
+            content: '❝';
+            position: absolute;
+            top: 8px; left: 12px;
+            font-size: 30px;
+            color: var(--amber-dim);
+            opacity: 0.4;
+        }
+        .literary-text {
+            font-family: var(--font-literary);
+            font-size: 20px; line-height: 1.5;
+            color: var(--amber-spark);
+            padding-left: 25px;
+            margin-bottom: 8px;
+        }
+        .literary-source {
+            font-family: var(--font-ui);
+            font-size: 11px;
+            color: var(--text-dim);
+            text-align: right;
+        }
+
+        /* ===== QUEST / MISSION SECTION ===== */
+        .quest-section {
+            margin-top: 15px;
+            padding: 15px;
+            background: var(--bg-glass);
+            border: 1px solid rgba(78,205,196,0.2);
+            border-radius: 10px;
+        }
+        .quest-title {
+            font-family: var(--font-ui);
+            font-size: 13px; font-weight: 600;
+            color: var(--cyan-glow);
+            margin-bottom: 8px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .quest-desc {
+            font-family: var(--font-body);
+            font-size: 14px; line-height: 1.6;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+        .quest-reward {
+            font-family: var(--font-ui);
+            font-size: 11px;
+            color: var(--amber-glow);
+            display: flex; align-items: center; gap: 6px;
+        }
+
+        /* ===== ADD TO MEMORY BUTTON ===== */
+        .btn-add-memory {
+            width: 100%;
+            padding: 14px;
+            margin-top: 18px;
+            font-family: var(--font-display);
+            font-size: 13px; font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, var(--amber-dim), var(--amber-glow));
+            color: var(--bg-void);
+            border: none; border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-add-memory:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(212,168,83,0.4);
+        }
+        .btn-add-memory.collected {
+            background: linear-gradient(135deg, var(--cyan-dim), var(--cyan-glow));
+            cursor: default;
+        }
+        .btn-add-memory.collected:hover {
+            transform: none; box-shadow: none;
+        }
+
+        /* ===== MEMORY COLLECTION PANEL ===== */
+        #memory-panel {
+            position: fixed;
+            top: 70px; left: 15px;
+            width: 350px;
+            max-height: calc(100vh - 170px);
+            z-index: var(--z-panel);
+            background: var(--bg-panel);
+            backdrop-filter: var(--blur-heavy);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: var(--transition-smooth);
+            transform: translateX(-400px);
+            opacity: 0;
+            box-shadow: var(--shadow-deep);
+        }
+        #memory-panel.open {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        .mem-panel-scroll {
+            max-height: calc(100vh - 170px);
+            overflow-y: auto;
+            padding-bottom: 15px;
+        }
+        .mem-header {
+            padding: 20px;
+            background: linear-gradient(180deg, rgba(78,205,196,0.08) 0%, transparent 100%);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .mem-header h3 {
+            font-family: var(--font-display);
+            font-size: 16px; font-weight: 700;
+            color: var(--text-highlight);
+            letter-spacing: 2px;
+            margin-bottom: 4px;
+        }
+        .mem-header p {
+            font-family: var(--font-ui);
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+        .mem-cards { padding: 15px; }
+        .mem-card {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+        .mem-card:hover {
+            border-color: var(--border-glow);
+            background: var(--bg-glass-hover);
+        }
+        .mem-card-icon {
+            width: 40px; height: 40px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        .mem-card-info { flex: 1; }
+        .mem-card-name {
+            font-family: var(--font-ui);
+            font-size: 13px; font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+        .mem-card-type {
+            font-family: var(--font-ui);
+            font-size: 10px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .mem-card-remove {
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-dim);
+            font-size: 12px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: var(--transition-smooth);
+        }
+        .mem-card-remove:hover {
+            background: var(--red-dim);
+            border-color: var(--red-ember);
+            color: #fff;
+        }
+        .mem-empty {
+            text-align: center; padding: 30px 20px;
+            font-family: var(--font-body);
+            font-size: 15px; color: var(--text-dim);
+            font-style: italic;
+        }
+
+        /* ===== PROFILE ANALYSIS ===== */
+        #profile-analysis {
+            margin: 0 15px 15px;
+            padding: 18px;
+            background: linear-gradient(135deg, rgba(212,168,83,0.08), rgba(78,205,196,0.05));
+            border: 1px solid var(--border-glow);
+            border-radius: 10px;
+            display: none;
+        }
+        #profile-analysis.visible { display: block; }
+        .profile-badge {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 10px;
+        }
+        .profile-badge-icon {
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--amber-glow), var(--amber-bright));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px;
+        }
+        .profile-badge-text {
+            font-family: var(--font-display);
+            font-size: 14px; font-weight: 700;
+            color: var(--amber-bright);
+        }
+        .profile-desc {
+            font-family: var(--font-body);
+            font-size: 14px; line-height: 1.6;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        /* ===== NOTIFICATION TOAST ===== */
+        .toast {
+            position: fixed;
+            bottom: 110px; left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            z-index: var(--z-modal);
+            padding: 14px 28px;
+            background: var(--bg-panel);
+            backdrop-filter: var(--blur-glass);
+            border: 1px solid var(--border-glow);
+            border-radius: 8px;
+            font-family: var(--font-ui);
+            font-size: 13px; font-weight: 500;
+            color: var(--amber-bright);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            pointer-events: none;
+            box-shadow: 0 8px 32px rgba(212,168,83,0.2);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* ===== CUSTOM MARKERS ===== */
+        .memory-marker {
+            position: relative;
+        }
+        .memory-marker-dot {
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            border: 2px solid var(--amber-glow);
+            background: radial-gradient(circle, var(--amber-bright) 0%, var(--amber-dim) 100%);
+            box-shadow: 0 0 12px rgba(212,168,83,0.5), 0 0 30px rgba(212,168,83,0.2);
+            animation: markerPulse 3s infinite ease-in-out;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .memory-marker-dot:hover {
+            transform: scale(1.4);
+        }
+        .memory-marker-dot.collected {
+            border-color: var(--cyan-glow);
+            background: radial-gradient(circle, var(--cyan-glow) 0%, var(--cyan-dim) 100%);
+            box-shadow: 0 0 12px rgba(78,205,196,0.5), 0 0 30px rgba(78,205,196,0.2);
+        }
+        .memory-marker-dot.hidden-by-time {
+            opacity: 0.15;
+            animation: none;
+            transform: scale(0.6);
+        }
+        @keyframes markerPulse {
+            0%, 100% { box-shadow: 0 0 12px rgba(212,168,83,0.5), 0 0 30px rgba(212,168,83,0.2); }
+            50% { box-shadow: 0 0 20px rgba(212,168,83,0.8), 0 0 50px rgba(212,168,83,0.3); }
+        }
+
+        .memory-marker-label {
+            position: absolute;
+            bottom: 24px; left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            background: var(--bg-panel);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-family: var(--font-ui);
+            font-size: 11px; font-weight: 600;
+            color: var(--amber-bright);
+            border: 1px solid var(--border-subtle);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .memory-marker-dot:hover + .memory-marker-label,
+        .memory-marker-label:hover {
+            opacity: 1;
+        }
+
+        /* ===== PROGRESS RING ===== */
+        .progress-ring-wrap {
+            position: relative;
+            width: 36px; height: 36px;
+        }
+        .progress-ring-bg {
+            stroke: var(--border-subtle);
+        }
+        .progress-ring-fg {
+            stroke: var(--amber-glow);
+            transition: stroke-dashoffset 0.5s ease;
+        }
+        .progress-ring-text {
+            position: absolute;
+            inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-ui);
+            font-size: 11px; font-weight: 700;
+            color: var(--amber-bright);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 900px) {
+            #location-panel { width: calc(100vw - 30px); right: 15px; }
+            #memory-panel { width: calc(100vw - 30px); left: 15px; }
+            .intro-title { font-size: 28px; }
+            .intro-subtitle { font-size: 14px; letter-spacing: 3px; }
+        }
+
+        /* ===== LEAFLET OVERRIDES ===== */
+        .leaflet-control-zoom { border: none !important; }
+        .leaflet-control-zoom a {
+            background: var(--bg-panel) !important;
+            color: var(--text-primary) !important;
+            border: 1px solid var(--border-subtle) !important;
+            backdrop-filter: var(--blur-glass);
+            width: 34px !important; height: 34px !important;
+            line-height: 34px !important;
+            font-size: 16px !important;
+        }
+        .leaflet-control-zoom a:hover {
+            background: var(--bg-glass-hover) !important;
+            border-color: var(--border-glow) !important;
+        }
+        .leaflet-control-attribution {
+            background: rgba(10,10,15,0.7) !important;
+            color: var(--text-dim) !important;
+            font-size: 9px !important;
+        }
+        .leaflet-control-attribution a { color: var(--amber-dim) !important; }
+    </style>
+</head>
+<body>
+
+<!-- ===== INTRO SCREEN ===== -->
+<div id="intro-screen">
+    <div class="intro-particles" id="intro-particles"></div>
+    <div class="intro-content">
+        <div class="intro-icon">🏛️</div>
+        <h1 class="intro-title">Kentsel Palimpsest</h1>
+        <p class="intro-subtitle">Adana — Kayıp Hafızanın İzinde</p>
+        <p class="intro-desc">
+            Kentin yüzyıllar boyunca üzerine yazılıp çizilen ancak hiçbir zaman tam anlamıyla silinemeyen 
+            devasa parşömenine adım atın. Her katmanda bir hikâye, her sokakta bir hayalet bekliyor.
+        </p>
+        <div class="intro-quote">
+            "Hiçbir eski metin tam olarak silinemez; yeni yazının altından daima 
+            geçmiş dönemin silik izleri hayalet gibi okunmaya devam eder."
+        </div>
+        <div class="intro-role-badge">
+            <span>⚡</span>
+            <span>Rolün: Siber-Flâneur — Aktif Bellek İnşacısı</span>
+        </div>
+        <br>
+        <button id="btn-start-game" onclick="startGame()">Yürüyüşe Başla</button>
+    </div>
+</div>
+
+<!-- ===== MAP ===== -->
+<div id="map"></div>
+
+<!-- ===== HUD BAR ===== -->
+<div id="hud-bar">
+    <div class="hud-logo">
+        <span class="hud-logo-icon">🏛️</span>
+        <span class="hud-logo-text">Kentsel Palimpsest</span>
+    </div>
+    <div class="hud-stats">
+        <div class="hud-stat">
+            <span>📍</span>
+            <span>Keşfedilen:</span>
+            <span class="hud-stat-value" id="stat-explored">0</span>
+            <span>/ 10</span>
+        </div>
+        <div class="hud-stat">
+            <span>🃏</span>
+            <span>Hafıza Kartları:</span>
+            <span class="hud-stat-value" id="stat-cards">0</span>
+        </div>
+        <div class="hud-stat" style="margin-left: 5px;">
+            <div class="progress-ring-wrap">
+                <svg width="36" height="36" viewBox="0 0 36 36">
+                    <circle class="progress-ring-bg" cx="18" cy="18" r="15" fill="none" stroke-width="3"/>
+                    <circle class="progress-ring-fg" id="progress-ring" cx="18" cy="18" r="15" fill="none" stroke-width="3"
+                            stroke-dasharray="94.25" stroke-dashoffset="94.25" stroke-linecap="round"
+                            transform="rotate(-90 18 18)"/>
+                </svg>
+                <div class="progress-ring-text" id="progress-percent">0%</div>
+            </div>
+        </div>
+    </div>
+    <div class="hud-actions">
+        <button class="hud-btn" id="btn-collection" onclick="toggleMemoryPanel()">
+            <span>📜</span> Hafıza Koleksiyonum
+        </button>
+    </div>
+</div>
+
+<!-- ===== TIME SLIDER ===== -->
+<div id="time-slider-panel">
+    <div class="time-slider-header">
+        <div>
+            <div class="time-slider-label">⏳ Zaman Sürgüsü — Kentin Katmanlarını Kazı</div>
+        </div>
+        <div style="text-align: right;">
+            <div class="time-slider-year" id="year-display">2025</div>
+            <div class="time-slider-era" id="era-display">Amnezik Modernleşme Çağı</div>
+        </div>
+    </div>
+    <input type="range" id="time-slider" min="1850" max="2025" value="2025" step="1">
+    <div class="time-markers">
+        <span>1850</span><span>1900</span><span>1920</span><span>1950</span>
+        <span>1960</span><span>1980</span><span>1990</span><span>2000</span><span>2025</span>
+    </div>
+</div>
+
+<!-- ===== LOCATION DETAIL PANEL ===== -->
+<div id="location-panel">
+    <div class="loc-panel-scroll" id="loc-panel-scroll"></div>
+</div>
+
+<!-- ===== MEMORY COLLECTION PANEL ===== -->
+<div id="memory-panel">
+    <div class="mem-panel-scroll">
+        <div class="mem-header">
+            <h3>📜 Kişisel Hafıza Koleksiyonum</h3>
+            <p>Topladığın hafıza kartları seni tanımlıyor...</p>
+        </div>
+        <div id="profile-analysis">
+            <div class="profile-badge">
+                <div class="profile-badge-icon" id="profile-icon">🎭</div>
+                <div class="profile-badge-text" id="profile-title">Profil Analizi</div>
+            </div>
+            <div class="profile-desc" id="profile-desc"></div>
+        </div>
+        <div class="mem-cards" id="mem-cards-container">
+            <div class="mem-empty">
+                Henüz hafıza kartı toplamadın.<br>
+                <small>Haritadaki kıvılcımlara tıkla ve "Hafızaya Ekle" butonuna bas.</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== TOAST NOTIFICATION ===== -->
+<div class="toast" id="toast"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ============================================================
+//  GAME DATA — 10 PILOT LOCATIONS FROM THESIS
+// ============================================================
+const LOCATIONS = [
+    {
+        id: 'taskopru',
+        name: 'Taşköprü ve Seyhan Nehri',
+        lat: 36.9925, lng: 35.3285,
+        startYear: -200,
+        memoryType: 'Sosyal Hafıza',
+        memoryClass: 'social',
+        icon: '🌉',
+        categories: ['cultural', 'social'],
+        npc: {
+            name: 'Balıkçı Halil Amca',
+            avatar: '🎣',
+            role: 'Seyhan kıyısının son tanığı',
+            dialogue: 'Evladım, bu köprü Roma\'dan kalma ama biz onu "kendimizden" bildik hep... Eskiden burada çocuklar nehre atlardı, anneler kıyıda çamaşır yıkardı. Şimdi ne kaldı? Beton duvarlar ve selfie çeken turistler...'
+        },
+        description: 'Antik Roma\'dan kalma köprü, kenti binlerce yıl boyunca fiziksel olarak birleştirmiştir. Kıyıdaki sulama kanalları ve nehir boyu, 1970\'ler ve 80\'lerde yerli halkın "suda yüzme" alt-kültürünün merkez sosyalleşme mekanı olmuştur.',
+        dialectical: {
+            past: 'Çocukların nehre atladığı, annelerin kıyıda çamaşır yıkadığı, kent takılarının balık tuttuğu canlı bir sosyal arena.',
+            present: 'Betonla çevrelenmiş, güvenlik bariyerli, "dokunulmaz" bir turistik fotoğraf alanı.'
+        },
+        literary: {
+            text: '"Seyhan sularına düşen gölgeler, kentin hafızasını yıkayan son dalgalardı..."',
+            source: 'Yerel tarih kayıtları — Çukurova Sözlü Belleği'
+        },
+        quest: {
+            title: '🎯 Görev: Nehrin Hafızasını Kurtar',
+            desc: 'Halil Amca\'nın anlattığı 3 farklı nehir kültürü pratiğini (balıkçılık, yüzme, çamaşır) haritandaki zaman sürgüsünü kullanarak doğru dönemlerle eşleştir.',
+            reward: '🏅 Sosyal Hafıza Kıvılcımı rozeti kazanılır.'
+        }
+    },
+    {
+        id: 'kazancilar',
+        name: 'Büyüksaat ve Kazancılar Çarşısı',
+        lat: 36.9890, lng: 35.3255,
+        startYear: 1500,
+        memoryType: 'Ekonomik Hafıza',
+        memoryClass: 'economic',
+        icon: '⚒️',
+        categories: ['economic'],
+        npc: {
+            name: 'Usta Kerim',
+            avatar: '🔨',
+            role: 'Son bakırcı ustası, Kazancılar Çarşısı',
+            dialogue: 'Bu çarşının her karışı ustanın eliyle, çırağın alın teriyle yoğruldu. Ahilik denen bir sistem vardı, bilir misin? Hem üretiriz hem paylaşırdık. Şimdi AVM\'ler geldi, el emeği bitti... Ama bu duvarlar hâlâ çekiç sesini hatırlıyor.'
+        },
+        description: 'Kentte AVM\'lerin yükselmesinden önce, geleneksel ahilik/zanaatkarlık geleneğinin (bakırcılar vb.) lokasyonudur. Palimpsestin en muhafazakâr, en altta kalan ve modern tüketim kültürüne inatla direnen katmanıdır.',
+        dialectical: {
+            past: 'Çekiç sesleriyle yankılanan, usta-çırak ilişkisiyle bilgi aktarılan canlı bir zanaat merkezi.',
+            present: 'Ucuz ithal ürünlerle dolu nostaljik bir "eski pazarımız" tabelasıyla etiketlenmiş turist durağı.'
+        },
+        literary: {
+            text: '"Bakırın üzerindeki her dövme izi, bir ustanın kente bıraktığı imzadır."',
+            source: 'Ahilik ve Çukurova Esnaf Kültürü'
+        },
+        quest: {
+            title: '🎯 Görev: Ahiliğin Kodunu Çöz',
+            desc: 'Usta Kerim\'in atölyesindeki 5 farklı bakır eser parçasını bul. Her biri farklı bir Osmanlı dönemine ait.',
+            reward: '🏅 Ekonomik Hafıza Arkeologu rozeti kazanılır.'
+        }
+    },
+    {
+        id: 'mensucat',
+        name: 'Milli Mensucat Fabrikası',
+        lat: 36.9950, lng: 35.3320,
+        startYear: 1907,
+        memoryType: 'Endüstriyel Hafıza',
+        memoryClass: 'industrial',
+        icon: '🏭',
+        categories: ['economic', 'industrial'],
+        npc: {
+            name: 'Bekçi Murtaza',
+            avatar: '👤',
+            role: 'Fabrika bekçisi — Orhan Kemal\'in dünyasından',
+            dialogue: 'Ben bu kapıda nöbet tuttum yıllarca... Binlerce işçi girip çıktı bu kapıdan. Her birinin yüzünde aynı yorgunluk, aynı umut... Şimdi "müze" diyorlar buraya. Müze mi? Benim nöbet kulübem müze mi olacaktı yani?'
+        },
+        description: 'Orhan Kemal\'in edebiyatına (Bekçi Murtaza formuna) ilham ve zemin olan, binlerce pamuk işçisinin yoksul ama umutlu kentleşme travmalarının yaşandığı dev üretim kampüsü. Şimdilerde elit bir "Müze Kompleksi"ne devşirilmiştir.',
+        dialectical: {
+            past: 'Binlerce yoksul işçiyi kan ter içinde çalıştıran dramatik bir üretim arenası — Orhan Kemal\'in "Murtaza"sının nöbet tuttuğu kapı.',
+            present: 'Steril, elit ve yüksek kültür odaklı "Adana Müze Kompleksi" — kafeteryalı, klimalı bir kültür vitrini.'
+        },
+        literary: {
+            text: '"Murtaza bu sabah da şafakla birlikte nöbet yerine geçti. Fabrika kapısının ardında makine uğultuları, insan sesleri çalkalanıyordu..."',
+            source: 'Orhan Kemal — Murtaza, 1952'
+        },
+        quest: {
+            title: '🎯 Görev: Murtaza\'nın Nöbet Defterini Bul',
+            desc: 'Fabrikada gizlenmiş Murtaza\'nın nöbet defterindeki 3 farklı tarihi kayıt parçasını keşfet. Her kayıt seni farklı bir döneme götürecek.',
+            reward: '🏅 Endüstriyel Bellek Koruyucusu rozeti kazanılır.'
+        }
+    },
+    {
+        id: 'tepebag',
+        name: 'Tepebağ Evleri ve Höyüğü',
+        lat: 36.9940, lng: 35.3250,
+        startYear: -6000,
+        memoryType: 'Mekânsal Hafıza',
+        memoryClass: 'spatial',
+        icon: '🏘️',
+        categories: ['cultural', 'social'],
+        npc: {
+            name: 'Kevser Teyze',
+            avatar: '👵',
+            role: 'Tepebağ\'ın son ahşap evinde yaşayan kadın',
+            dialogue: 'Bu evin duvarlarında Ermeni komşularımızın dua sesleri yankılanır hâlâ... Osmanlı boyası bile tam soyulmadı daha. Yıkacaklardı bu evi, "imar" diye. Ben gidersem bu duvarlar kiminle konuşacak?'
+        },
+        description: 'Kökleri antik çağa inen höyük üzerine kurulu, Osmanlı ve Ermeni sivil mimarisinin omuz omuza geçtiği, kentteki organik tarihsel komşuluk belleğinin en ağır merkezidir.',
+        dialectical: {
+            past: 'Osmanlı, Ermeni ve Müslüman komşuluk kültürünün ahşap evlerde iç içe yaşandığı organik bir yerleşim.',
+            present: 'Restorasyon projeleriyle "kurtarılmaya çalışılan" ama çoğu terkedilmiş, harabe haline gelmiş birkaç ahşap ev.'
+        },
+        literary: {
+            text: '"Tepebağ\'ın taşından bile tarih akar; höyüğün altında medeniyetler uyuyor, üstünde ise unutma savaşı veriliyor."',
+            source: 'Çukurova Yerel Tarih Araştırmaları'
+        },
+        quest: {
+            title: '🎯 Görev: Höyüğün Katmanlarını Kaz',
+            desc: 'Zaman sürgüsünü kullanarak Tepebağ höyüğünün 6 farklı tarihsel katmanını (Antik Çağ → Osmanlı → Cumhuriyet) keşfet.',
+            reward: '🏅 Mekânsal Hafıza Arkeologu rozeti kazanılır.'
+        }
+    },
+    {
+        id: 'yazlik_sinema',
+        name: 'Yazlık Sinemalar / Sular Yolu',
+        lat: 36.9910, lng: 35.3230,
+        startYear: 1955,
+        endYear: 1985,
+        memoryType: 'Kültürel Hafıza',
+        memoryClass: 'cultural',
+        icon: '🎬',
+        categories: ['cultural'],
+        npc: {
+            name: 'Makineci Hasan',
+            avatar: '📽️',
+            role: 'Yazlık sinema makinecisi (1963-1981)',
+            dialogue: 'Ah evladım, o yıldızlı geceleri bir bilseydin! Perdede Türkan Şoray oynarken, seyirci çekirdek çıtlatır, limonata içerdi... Doktor da gelirdi, işçi de. Sinema herkesi eşit yapardı o gecelerde. Sonra televizyon geldi, apartmanlar çıktı... Sinemalar yıkıldı.'
+        },
+        description: 'Henüz televizyonun yaygınlaşmadığı 1960-1970\'li yıllarda Adana\'da toplumun her sınıfını yan yana getiren açık hava sinemaları, dikey apartmanlaşma furyasına tamamen yenik düşerek fiziken silinmiştir.',
+        dialectical: {
+            past: 'Yıldızlı gecelerde doktor ile işçiyi, zengin ile fakiri yan yana oturtup eşitleyen demokratik bir kültürel arena.',
+            present: 'Hiçbir iz kalmadan üzerine dikilen çok katlı apartman blokları — fiziksel silme: tam.'
+        },
+        literary: {
+            text: '"Perdenin önünde herkes eşitti — ne patron vardı ne amele. Sadece hikâye vardı ve biz o hikâyenin içindeydik..."',
+            source: 'Çukurova Yaşlılarının Sözlü Belleği'
+        },
+        quest: {
+            title: '🎯 Görev: Kayıp Perdeyi Yeniden Aç',
+            desc: 'Makineci Hasan\'ın anılarından 4 farklı film afişini (1960-1980 arası) kronolojik sıraya diz ve yazlık sinemanın hayalet perdesini dijital olarak yeniden inşa et.',
+            reward: '🏅 Kültürel Hafıza Koruyucusu rozeti kazanılır.'
+        }
+    },
+    {
+        id: 'eski_gar',
+        name: 'Eski Tren Garı ve Meydanı',
+        lat: 36.9870, lng: 35.3310,
+        startYear: 1886,
+        memoryType: 'Göç Hafızası',
+        memoryClass: 'migration',
+        icon: '🚂',
+        categories: ['social', 'migration'],
+        npc: {
+            name: 'Elçi İbrahim',
+            avatar: '👨‍🌾',
+            role: 'Güneydoğu\'dan gelen mevsimlik tarım işçisi',
+            dialogue: 'Trenden indiğimizde gözlerimiz kamaştı — bu kadar büyük bir şehir görmemiştik. Gar meydanında toplandık, ağalar geldi, "sen gelirsin, sen kalırsın" dedi. İnsan pazarıydı orası... Ama ne yapacaktık, çoluk çocuk aç.'
+        },
+        description: 'Kırsaldan, Güneydoğu\'dan veya İç Anadolu\'dan tarım ovasına çalışmaya gelen tren dolusu işçinin kentle girdiği ilk şokun yaşandığı, Orhan Kemal\'in "Bereketli Topraklar Üzerinde" romanının kapısının açıldığı yerdir.',
+        dialectical: {
+            past: 'Tren dolusu yoksul göçmenin "insan pazarı" olarak kullanıldığı, umut ve korkunun iç içe geçtiği bir karşılama meydanı.',
+            present: 'Bakımsız bir tarihi bina ve etrafında park alanına dönüştürülmüş anonim bir şehir meydanı.'
+        },
+        literary: {
+            text: '"İflahsızın biri ekmek torbasını yere attı, tren penceresinden büyük şehri görünce gözleri yuvarlak yuvarlak açıldı... Bereketli topraklar onları bekliyordu—ama o bereket kiminindi?"',
+            source: 'Orhan Kemal — Bereketli Topraklar Üzerinde, 1954'
+        },
+        quest: {
+            title: '🎯 Görev: Elçilerin Rotasını İzle',
+            desc: 'İbrahim\'in hikâyesini takip ederek trenden gar meydanına, oradan pamuk tarlalarına uzanan göç yolunu haritada yeniden çiz.',
+            reward: '🏅 Göç Hafızası Arkeologu rozeti kazanılır.'
+        }
+    },
+    {
+        id: 'karatas',
+        name: 'Karataş Yolu ve Pamuk Tarlaları',
+        lat: 36.9770, lng: 35.3380,
+        startYear: 1870,
+        memoryType: 'Tarımsal Hafıza',
+        memoryClass: 'agricultural',
+        icon: '🌾',
+        categories: ['economic', 'agricultural'],
+        npc: {
+            name: 'Irgatbaşı Yusuf',
+            avatar: '🧑‍🌾',
+            role: 'Pamuk tarlalarının ırgatbaşısı',
+            dialogue: 'Beyaz altın derlerdi pamuğa... Ama o beyazlığın altında kapkara eller, terden sırılsıklam sırtlar vardı. Şimdi tarlaların yerinde plazalar yükseliyor. Toprağın hafızasını betona gömdüler.'
+        },
+        description: 'Yaşar Kemal evreninin "Beyaz Altın"ı sayılan uçsuz bucaksız tarım topraklarının, günümüzde lüks plaza yapılarına dönüştüğü; doğrudan bir "amnezi" (hafıza çöküş/yitiklik) aksıdır.',
+        dialectical: {
+            past: 'Çukurova\'nın efsanevi "Beyaz Altın" (pamuk) tarlaları — binlerce mevsimlik işçinin ter döktüğü sınırsız topraklar.',
+            present: 'Lüks rezidanslar, AVM\'ler ve yapay peyzajlı site projeleri — toprağın hafızası betonla örtülmüş.'
+        },
+        literary: {
+            text: '"Bu topraklar kan içmiştir, ter içmiştir, gözyaşı içmiştir... Ama bereketini hiç yitirmemiştir—yitirenler insanlardır."',
+            source: 'Yaşar Kemal — Çukurova destanlarından'
+        },
+        quest: {
+            title: '🎯 Görev: Beyaz Altının İzini Sür',
+            desc: 'Yusuf\'un tarla haritasını kullanarak 1950\'lerden bugüne pamuk ekim alanlarının nasıl betonlaştığını zaman sürgüsüyle vizüalize et.',
+            reward: '🏅 Tarımsal Bellek Tanığı rozeti kazanılır.'
+        }
+    },
+    {
+        id: 'ziyapasa',
+        name: 'Ziyapaşa Bulvarı',
+        lat: 36.9905, lng: 35.3200,
+        startYear: 1930,
+        memoryType: 'Sosyo-Ekonomik Hafıza',
+        memoryClass: 'socioeconomic',
+        icon: '🌴',
+        categories: ['social', 'economic'],
+        npc: {
+            name: 'Muallim Neriman',
+            avatar: '👩‍🏫',
+            role: 'Cumhuriyet dönemi kadın öğretmeni',
+            dialogue: 'Bu bulvar Cumhuriyet\'in Adana\'ya hediyesiydi — palmiyeler, geniş kaldırımlar, batılı bir kentlilik hayali... İlk kez burada "şehirli" hissettik kendimizi. Sonra o rüya bir tüketim sahnesine döndü.'
+        },
+        description: 'Erken Cumhuriyet dönemi batılılaşma, palm ağaçlı geniş bulvar tasarımı ve yeni yeni filizlenen o günün kent burjuvazisinin tüketim mekanıdır.',
+        dialectical: {
+            past: 'Cumhuriyet\'in modernleşme idealiyle tasarlanmış, palmiyeli aydınlanma bulvarı — kentlileşmenin sembolü.',
+            present: 'Trafik sıkışıklığı, reklam panoları ve zincir mağazalarla dolu sıradan bir ticaret aksı.'
+        },
+        literary: {
+            text: '"Bulvarda yürürken Batı\'yı keşfettik; palmiyeler bize Avrupa\'yı hatırlattı, ama ayaklarımız hâlâ Çukurova toprağındaydı..."',
+            source: 'Adana Cumhuriyet Dönemi Anıları'
+        },
+        quest: {
+            title: '🎯 Görev: Cumhuriyet Bulvarı\'nı Yeniden Yürü',
+            desc: 'Muallim Neriman\'ın 1940\'lar hatıra fotoğraflarındaki 5 mimari dönüşüm noktasını bugünkü halleriyle karşılaştır.',
+            reward: '🏅 Sosyal Tarihçi rozeti kazanılır.'
+        }
+    },
+    {
+        id: 'kocavezir',
+        name: 'Kocavezir ve Eski Sebze Hali',
+        lat: 36.9880, lng: 35.3270,
+        startYear: 1920,
+        memoryType: 'Ekonomik Hafıza',
+        memoryClass: 'economic',
+        icon: '🥘',
+        categories: ['economic', 'social'],
+        npc: {
+            name: 'Tablakar Mehmet',
+            avatar: '🧑‍🍳',
+            role: 'Seyyar kebapçı — gece Adana\'sının aktörü',
+            dialogue: 'Gecenin ikisinde tabla kurardım. Şoför gelirdi, gece bekçisi gelirdi, sarhoş gelirdi — ama o sofrada herkes kardeşti. Kebabın dumanı kentin diliydi, kokusu hafızasıydı. İktidar bu sokağa hükmedemezdi çünkü burası BİZİMDİ.'
+        },
+        description: '"Tablakar" (seyyar satıcılık, kebapçılık) kültürünün ve sokak lezzetlerinin gece metropol yaşamına pazarlandığı, iktidarın dilsiz kentine inat kendi dilini kurarak direnen dar gelirli bir yaya kültürüdür. De Certeau\'nun "Taktikleri"nin en somut hali.',
+        dialectical: {
+            past: 'Gece yarısına kadar canlı, seyyar sofracıların kendi "yer altı ekonomisi"ni kurduğu, iktidarın kontrolünün dışında bir sokak kültürü.',
+            present: 'Belediye düzenlemesiyle "modernize edilmiş", ruhsuz bir hal binasına hapsedilmiş organize pazar.'
+        },
+        literary: {
+            text: '"Tablanın üzerinde ne yazıyorsa o kentin gerçek dilidir; gazetelerde yazmayanı tablakar bilir."',
+            source: 'Michel de Certeau perspektifinden — Adana Sokak Kültürü'
+        },
+        quest: {
+            title: '🎯 Görev: Tablakar\'ın Gizli Rotasını Keşfet',
+            desc: 'Mehmet\'in gece boyunca tabla ile dolaştığı 4 durak noktasını haritada işaretle — her durakta farklı bir müşteri tipi ve hikâyesi var.',
+            reward: '🏅 Sokak Hafızası Koleksiyoncusu rozeti kazanılır.'
+        }
+    },
+    {
+        id: 'turgut_ozal',
+        name: 'Turgut Özal Bulvarı / Yeni Adana',
+        lat: 37.0020, lng: 35.3350,
+        startYear: 1990,
+        memoryType: 'Modern Hafıza',
+        memoryClass: 'modern',
+        icon: '🏢',
+        categories: ['modern'],
+        npc: {
+            name: 'Z-Kuşağı Elif',
+            avatar: '👩‍💻',
+            role: 'Üniversite öğrencisi, "Yeni Adana"da büyümüş',
+            dialogue: 'Ben bu AVM\'lerde, bu plazalarda büyüdüm. "Eski Adana" diye bir şey duymadım ta ki bu projeyi görene kadar. Meğer aşağıda, Seyhan\'ın öbür yakasında bambaşka bir şehir varmış... Hafıza dediğin Instagram story\'si değilmiş.'
+        },
+        description: 'Palimpsestin en tepe noktası, günümüzün son boyasıdır. Geçmiş organik kenti reddeden, bütünüyle otomobil ve marka tüketimi odaklı dikey bir betonlaşmadır.',
+        dialectical: {
+            past: 'Bu alan 1980 öncesinde boş tarım arazileri ve birkaç köy yerleşiminden ibaretti.',
+            present: 'Çok katlı plazalar, zincir AVM\'ler, otomobil odaklı bulvarlar — kentin geçmişiyle sıfır bağ, tam amnezi.'
+        },
+        literary: {
+            text: '"Gökdelenler kentin hafızasını gölgede bırakır; ne kadar yükselirsen, o kadar unutursun altındakileri."',
+            source: 'Kentsel Palimpsest — Tez Yorumu'
+        },
+        quest: {
+            title: '🎯 Görev: Amnezinin Haritasını Çıkar',
+            desc: 'Elif ile birlikte "Yeni Adana"da yürü ve 1990 öncesinde bu alanda ne olduğunu zaman sürgüsüyle keşfet. Sorunu adlandır: "Amnezik Modernleşme".',
+            reward: '🏅 Kentsel Dönüşüm Tanığı rozeti kazanılır.'
+        }
+    }
+];
+
+// ============================================================
+//  PLAYER PROFILES
+// ============================================================
+const PROFILES = [
+    {
+        id: 'cultural',
+        title: 'Kültürel Hafıza Koruyucusu',
+        icon: '🎭',
+        trigger: ['yazlik_sinema', 'tepebag', 'taskopru'],
+        desc: 'Haritadan yaptığın seçimler kenti daha çok Kültürel bir bağlamda deneyimlediğini gösteriyor. Eski sinemalar ve tarihi organik sokaklar senin kent algının tam merkezinde yer alıyor. Benjamin\'in flâneur\'ü gibi kentin ruhunu arıyorsun.'
+    },
+    {
+        id: 'economic',
+        title: 'Emek Odaklı Gözlemci',
+        icon: '⚒️',
+        trigger: ['mensucat', 'kazancilar', 'kocavezir'],
+        desc: 'Seçimlerin, kenti Ekonomik ve Emek boyutuyla okuduğunu ortaya koyuyor. Fabrika duvarlarındaki ter izleri, çarşı esnafının çekiç sesleri senin kentsel hafıza haritanın yapıtaşlarını oluşturuyor.'
+    },
+    {
+        id: 'migration',
+        title: 'Göç Hafızası Arkeologu',
+        icon: '🚂',
+        trigger: ['eski_gar', 'karatas', 'kocavezir'],
+        desc: 'Kenti, göç hareketleri ve sınıf atlama mücadeleleri üzerinden okuyorsun. Gar meydanından pamuk tarlalarına uzanan travmatik yolculuk senin bellek rotanı çiziyor.'
+    },
+    {
+        id: 'transformation',
+        title: 'Kentsel Dönüşüm Tanığı',
+        icon: '🏗️',
+        trigger: ['turgut_ozal', 'ziyapasa', 'mensucat'],
+        desc: 'Seçimlerin "eski ile yeni" arasındaki çatışmayı gözlemlediğini gösteriyor. Sen diyalektik imgenin peşindesin — geçmişle bugünün çarpıştığı o şimşeği arıyorsun.'
+    },
+    {
+        id: 'flaneur',
+        title: 'Tam Bir Siber-Flâneur',
+        icon: '🚶',
+        minCards: 7,
+        desc: 'Benjamin\'in kusursuz flâneur\'ü gibi kentin her katmanında dolaştın. Ne tek bir kategoriye hapsolundun ne de bir rotaya bağlandın — tam bir taktiksel yürüyüşçü. Certeau gurur duyardı.'
+    }
+];
+
+// ============================================================
+//  ERA DEFINITIONS
+// ============================================================
+const ERAS = [
+    { max: 1870, name: 'Antik ve Osmanlı Dönemi', color: '#9b59b6' },
+    { max: 1923, name: 'Son Osmanlı / İşgal Dönemi', color: '#e67e22' },
+    { max: 1950, name: 'Erken Cumhuriyet — Tarım Devrimi', color: '#2ecc71' },
+    { max: 1970, name: 'Sanayileşme ve Göç Dalgası', color: '#e74c3c' },
+    { max: 1985, name: 'İşçi Sınıfı Kültürünün Altın Çağı', color: '#f1c40f' },
+    { max: 1995, name: 'Neoliberal Dönüşüm Başlangıcı', color: '#3498db' },
+    { max: 2010, name: 'Amnezik Kentleşme Dalgası', color: '#95a5a6' },
+    { max: 2025, name: 'Amnezik Modernleşme Çağı', color: '#7f8c8d' }
+];
+
+// ============================================================
+//  GAME STATE
+// ============================================================
+let map;
+let markers = {};
+let memoryCollection = [];
+let exploredLocations = new Set();
+let currentYear = 2025;
+let locationPanelOpen = false;
+let memoryPanelOpen = false;
+
+// ============================================================
+//  INITIALIZATION
+// ============================================================
+function initParticles() {
+    const container = document.getElementById('intro-particles');
+    for (let i = 0; i < 40; i++) {
+        const p = document.createElement('div');
+        p.className = 'intro-particle';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.animationDelay = Math.random() * 8 + 's';
+        p.style.animationDuration = (6 + Math.random() * 6) + 's';
+        const colors = ['var(--amber-glow)', 'var(--cyan-glow)', 'var(--amber-dim)', 'var(--purple-mist)'];
+        p.style.background = colors[Math.floor(Math.random() * colors.length)];
+        p.style.width = (2 + Math.random() * 3) + 'px';
+        p.style.height = p.style.width;
+        container.appendChild(p);
+    }
+}
+initParticles();
+
+function startGame() {
+    document.getElementById('intro-screen').classList.add('hidden');
+    setTimeout(initMap, 500);
+}
+
+function initMap() {
+    map = L.map('map', {
+        center: [36.993, 35.328],
+        zoom: 14,
+        zoomControl: true,
+        attributionControl: true
+    });
+
+    // CartoDB Dark Matter — tezdeki "karanlık tema"
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://carto.com/">CARTO</a> | Kentsel Palimpsest Projesi',
+        subdomains: 'abcd',
+        maxZoom: 19
+    }).addTo(map);
+
+    // Add markers
+    LOCATIONS.forEach(loc => {
+        const markerDiv = document.createElement('div');
+        markerDiv.className = 'memory-marker';
+        markerDiv.innerHTML = `
+            <div class="memory-marker-dot" id="dot-${loc.id}"></div>
+            <div class="memory-marker-label">${loc.icon} ${loc.name}</div>
+        `;
+
+        const icon = L.divIcon({
+            html: markerDiv.outerHTML,
+            className: 'memory-marker',
+            iconSize: [18, 18],
+            iconAnchor: [9, 9]
+        });
+
+        const marker = L.marker([loc.lat, loc.lng], { icon }).addTo(map);
+        marker.on('click', () => openLocationPanel(loc));
+        markers[loc.id] = marker;
+    });
+
+    // Time slider
+    document.getElementById('time-slider').addEventListener('input', handleTimeSlider);
+    
+    showToast('🏛️ Haritaya hoş geldin, Siber-Flâneur! Parlayan kıvılcımlara tıkla...');
+}
+
+// ============================================================
+//  TIME SLIDER
+// ============================================================
+function handleTimeSlider(e) {
+    currentYear = parseInt(e.target.value);
+    document.getElementById('year-display').textContent = currentYear;
+    
+    const era = ERAS.find(er => currentYear <= er.max) || ERAS[ERAS.length - 1];
+    document.getElementById('era-display').textContent = era.name;
+
+    LOCATIONS.forEach(loc => {
+        const markerEl = document.querySelector(`#dot-${loc.id}`);
+        if (!markerEl) return;
+        
+        const isVisible = (loc.startYear <= currentYear) && (!loc.endYear || loc.endYear >= currentYear);
+        
+        if (!isVisible) {
+            markerEl.classList.add('hidden-by-time');
+        } else {
+            markerEl.classList.remove('hidden-by-time');
+        }
+    });
+}
+
+// ============================================================
+//  LOCATION PANEL
+// ============================================================
+function openLocationPanel(loc) {
+    exploredLocations.add(loc.id);
+    updateHUD();
+
+    const isCollected = memoryCollection.some(m => m.id === loc.id);
+    const memTypeClass = `memory-type-${loc.memoryClass}`;
+
+    const html = `
+        <div class="loc-header">
+            <button class="loc-close" onclick="closeLocationPanel()">✕</button>
+            <span class="loc-memory-type ${memTypeClass}">${loc.memoryType}</span>
+            <div class="loc-title">${loc.icon} ${loc.name}</div>
+            <div class="loc-period">Kuruluş: ~${loc.startYear < 0 ? 'M.Ö. ' + Math.abs(loc.startYear) : loc.startYear}${loc.endYear ? ' — Yıkılış: ~' + loc.endYear : ''}</div>
+        </div>
+        <div class="loc-body">
+            <h4>📜 Mekânın Hikâyesi</h4>
+            <p class="loc-description">${loc.description}</p>
+
+            <h4>👤 NPC — ${loc.npc.name}</h4>
+            <div class="npc-section">
+                <div class="npc-avatar">${loc.npc.avatar}</div>
+                <div class="npc-info">
+                    <div class="npc-name">${loc.npc.name}</div>
+                    <div class="npc-role">${loc.npc.role}</div>
+                    <div class="npc-dialogue">"${loc.npc.dialogue}"</div>
+                </div>
+            </div>
+
+            <h4>⚡ Diyalektik İmge — Geçmiş ve Bugün Çarpışması</h4>
+            <div class="dialectical-section">
+                <div class="dialectical-header">
+                    <span>⚡</span> Walter Benjamin — Diyalektik Şimşek
+                </div>
+                <div class="dialectical-row">
+                    <div class="dialectical-past">
+                        <div class="dialectical-label">⏪ Geçmiş</div>
+                        <div class="dialectical-text">${loc.dialectical.past}</div>
+                    </div>
+                    <div class="dialectical-vs">VS</div>
+                    <div class="dialectical-present">
+                        <div class="dialectical-label">⏩ Bugün</div>
+                        <div class="dialectical-text">${loc.dialectical.present}</div>
+                    </div>
+                </div>
+            </div>
+
+            <h4>📖 Edebi İpucu — Lore Parçası</h4>
+            <div class="literary-clue">
+                <div class="literary-text">${loc.literary.text}</div>
+                <div class="literary-source">— ${loc.literary.source}</div>
+            </div>
+
+            <h4>🎮 Görev</h4>
+            <div class="quest-section">
+                <div class="quest-title">${loc.quest.title}</div>
+                <div class="quest-desc">${loc.quest.desc}</div>
+                <div class="quest-reward">${loc.quest.reward}</div>
+            </div>
+
+            <button class="btn-add-memory ${isCollected ? 'collected' : ''}" 
+                    onclick="${isCollected ? '' : `addToMemory('${loc.id}')`}"
+                    id="btn-mem-${loc.id}">
+                ${isCollected ? '✅ Koleksiyonda' : '📜 Hafızaya Ekle'}
+            </button>
+        </div>
+    `;
+
+    document.getElementById('loc-panel-scroll').innerHTML = html;
+    document.getElementById('location-panel').classList.add('open');
+    locationPanelOpen = true;
+
+    // Close memory panel if open
+    if (memoryPanelOpen) toggleMemoryPanel();
+}
+
+function closeLocationPanel() {
+    document.getElementById('location-panel').classList.remove('open');
+    locationPanelOpen = false;
+}
+
+// ============================================================
+//  MEMORY COLLECTION
+// ============================================================
+function addToMemory(locId) {
+    const loc = LOCATIONS.find(l => l.id === locId);
+    if (!loc || memoryCollection.some(m => m.id === locId)) return;
+
+    memoryCollection.push(loc);
+
+    // Update marker visual
+    const markerEl = document.querySelector(`#dot-${loc.id}`);
+    if (markerEl) markerEl.classList.add('collected');
+
+    // Update button in panel
+    const btn = document.getElementById(`btn-mem-${locId}`);
+    if (btn) {
+        btn.classList.add('collected');
+        btn.textContent = '✅ Koleksiyonda';
+        btn.onclick = null;
+    }
+
+    updateHUD();
+    updateMemoryPanel();
+    analyzeProfile();
+
+    showToast(`📜 "${loc.name}" hafıza koleksiyonuna eklendi!`);
+}
+
+function removeFromMemory(locId) {
+    memoryCollection = memoryCollection.filter(m => m.id !== locId);
+
+    const markerEl = document.querySelector(`#dot-${locId}`);
+    if (markerEl) markerEl.classList.remove('collected');
+
+    updateHUD();
+    updateMemoryPanel();
+    analyzeProfile();
+}
+
+function updateMemoryPanel() {
+    const container = document.getElementById('mem-cards-container');
+
+    if (memoryCollection.length === 0) {
+        container.innerHTML = `<div class="mem-empty">
+            Henüz hafıza kartı toplamadın.<br>
+            <small>Haritadaki kıvılcımlara tıkla ve "Hafızaya Ekle" butonuna bas.</small>
+        </div>`;
+        return;
+    }
+
+    container.innerHTML = memoryCollection.map(loc => `
+        <div class="mem-card" onclick="openLocationPanel(LOCATIONS.find(l => l.id === '${loc.id}'))">
+            <div class="mem-card-icon" style="background: var(--bg-glass); border: 1px solid var(--border-subtle);">${loc.icon}</div>
+            <div class="mem-card-info">
+                <div class="mem-card-name">${loc.name}</div>
+                <div class="mem-card-type">${loc.memoryType}</div>
+            </div>
+            <button class="mem-card-remove" onclick="event.stopPropagation(); removeFromMemory('${loc.id}')">✕</button>
+        </div>
+    `).join('');
+}
+
+function toggleMemoryPanel() {
+    const panel = document.getElementById('memory-panel');
+    const btn = document.getElementById('btn-collection');
+    memoryPanelOpen = !memoryPanelOpen;
+    panel.classList.toggle('open', memoryPanelOpen);
+    btn.classList.toggle('active', memoryPanelOpen);
+
+    // Close location panel if open
+    if (memoryPanelOpen && locationPanelOpen) closeLocationPanel();
+}
+
+// ============================================================
+//  PROFILE ANALYSIS
+// ============================================================
+function analyzeProfile() {
+    const analysis = document.getElementById('profile-analysis');
+    
+    if (memoryCollection.length < 3) {
+        analysis.classList.remove('visible');
+        return;
+    }
+
+    const collectedIds = memoryCollection.map(m => m.id);
+    
+    // Check specific profiles first
+    let matched = null;
+    for (const profile of PROFILES) {
+        if (profile.minCards) {
+            if (memoryCollection.length >= profile.minCards) {
+                matched = profile;
+            }
+            continue;
+        }
+        const triggerMatch = profile.trigger.filter(t => collectedIds.includes(t)).length;
+        if (triggerMatch >= 2 && (!matched || triggerMatch > (matched._score || 0))) {
+            matched = { ...profile, _score: triggerMatch };
+        }
+    }
+
+    // Fallback: categorize based on dominant category
+    if (!matched) {
+        const catCount = {};
+        memoryCollection.forEach(loc => {
+            (loc.categories || []).forEach(cat => {
+                catCount[cat] = (catCount[cat] || 0) + 1;
+            });
+        });
+        const dominant = Object.entries(catCount).sort((a, b) => b[1] - a[1])[0];
+        if (dominant) {
+            const catProfiles = {
+                cultural: PROFILES[0],
+                economic: PROFILES[1],
+                social: PROFILES[0],
+                migration: PROFILES[2],
+                industrial: PROFILES[1],
+                modern: PROFILES[3],
+                agricultural: PROFILES[2]
+            };
+            matched = catProfiles[dominant[0]] || PROFILES[0];
+        }
+    }
+
+    if (matched) {
+        document.getElementById('profile-icon').textContent = matched.icon;
+        document.getElementById('profile-title').textContent = matched.title;
+        document.getElementById('profile-desc').textContent = matched.desc;
+        analysis.classList.add('visible');
+    }
+}
+
+// ============================================================
+//  HUD UPDATES
+// ============================================================
+function updateHUD() {
+    document.getElementById('stat-explored').textContent = exploredLocations.size;
+    document.getElementById('stat-cards').textContent = memoryCollection.length;
+    
+    const pct = Math.round((memoryCollection.length / LOCATIONS.length) * 100);
+    document.getElementById('progress-percent').textContent = pct + '%';
+    
+    const circumference = 2 * Math.PI * 15; // r=15
+    const offset = circumference - (pct / 100) * circumference;
+    document.getElementById('progress-ring').style.strokeDashoffset = offset;
+}
+
+// ============================================================
+//  TOAST
+// ============================================================
+function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.innerHTML = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3500);
+}
+
+</script>
+</body>
+</html>
