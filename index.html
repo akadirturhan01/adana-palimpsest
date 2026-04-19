@@ -858,12 +858,185 @@
             color: var(--amber-bright);
         }
 
+        /* ===== USER MEMORY MODAL ===== */
+        #memory-modal-overlay {
+            position: fixed; inset: 0;
+            z-index: var(--z-overlay);
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center; justify-content: center;
+        }
+        #memory-modal-overlay.open { display: flex; }
+        #memory-modal {
+            width: 440px; max-width: 90vw;
+            background: var(--bg-deep);
+            border: 1px solid var(--border-glow);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 40px rgba(212,168,83,0.1);
+            animation: modalIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.9) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .modal-header {
+            padding: 22px 25px;
+            background: linear-gradient(180deg, rgba(212,168,83,0.1) 0%, transparent 100%);
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .modal-header h3 {
+            font-family: var(--font-display);
+            font-size: 16px; font-weight: 700;
+            color: var(--amber-bright);
+            letter-spacing: 2px;
+        }
+        .modal-close {
+            width: 32px; height: 32px;
+            background: var(--bg-glass); border: 1px solid var(--border-subtle);
+            border-radius: 50%; color: var(--text-secondary);
+            font-size: 16px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: var(--transition-smooth);
+        }
+        .modal-close:hover { background: var(--red-dim); border-color: var(--red-ember); color: #fff; }
+        .modal-body { padding: 25px; }
+        .modal-hint {
+            font-family: var(--font-body);
+            font-size: 14px; color: var(--text-secondary);
+            line-height: 1.6; margin-bottom: 18px;
+            font-style: italic;
+        }
+        .modal-field { margin-bottom: 16px; }
+        .modal-field label {
+            display: block;
+            font-family: var(--font-ui);
+            font-size: 11px; font-weight: 600;
+            letter-spacing: 2px; text-transform: uppercase;
+            color: var(--text-dim); margin-bottom: 6px;
+        }
+        .modal-field input, .modal-field textarea, .modal-field select {
+            width: 100%; padding: 12px 14px;
+            background: var(--bg-glass); border: 1px solid var(--border-subtle);
+            border-radius: 8px; color: var(--text-primary);
+            font-family: var(--font-body); font-size: 15px;
+            outline: none; transition: var(--transition-smooth);
+        }
+        .modal-field input:focus, .modal-field textarea:focus, .modal-field select:focus {
+            border-color: var(--amber-glow);
+            box-shadow: 0 0 12px rgba(212,168,83,0.15);
+        }
+        .modal-field textarea { min-height: 100px; resize: vertical; line-height: 1.6; }
+        .modal-field select option { background: var(--bg-deep); color: var(--text-primary); }
+        .modal-coord-info {
+            font-family: var(--font-ui); font-size: 11px;
+            color: var(--cyan-glow); padding: 8px 12px;
+            background: rgba(78,205,196,0.08); border-radius: 6px;
+            border: 1px solid rgba(78,205,196,0.15); margin-bottom: 16px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .btn-submit-memory {
+            width: 100%; padding: 14px;
+            font-family: var(--font-display);
+            font-size: 13px; font-weight: 700;
+            letter-spacing: 3px; text-transform: uppercase;
+            background: linear-gradient(135deg, #2a7a74, #4ecdc4);
+            color: var(--bg-void); border: none; border-radius: 8px;
+            cursor: pointer; transition: var(--transition-smooth);
+        }
+        .btn-submit-memory:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(78,205,196,0.4);
+        }
+        .btn-submit-memory:disabled {
+            opacity: 0.4; cursor: not-allowed; transform: none;
+            box-shadow: none;
+        }
+
+        /* ===== USER MEMORY MARKERS ===== */
+        .user-memory-dot {
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            border: 2px solid #2ecc71;
+            background: radial-gradient(circle, #4ecdc4 0%, #1a8a7e 100%);
+            box-shadow: 0 0 10px rgba(46,204,113,0.5), 0 0 25px rgba(46,204,113,0.15);
+            animation: userMarkerPulse 4s infinite ease-in-out;
+            cursor: pointer;
+        }
+        @keyframes userMarkerPulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(46,204,113,0.5), 0 0 25px rgba(46,204,113,0.15); }
+            50% { box-shadow: 0 0 18px rgba(46,204,113,0.8), 0 0 40px rgba(46,204,113,0.25); }
+        }
+
+        /* ===== USER MEMORY POPUP ===== */
+        .user-popup { min-width: 260px; }
+        .user-popup-name {
+            font-family: var(--font-display);
+            font-size: 13px; font-weight: 700;
+            color: #2ecc71; margin-bottom: 4px;
+        }
+        .user-popup-year {
+            font-family: var(--font-ui); font-size: 10px;
+            color: #888; margin-bottom: 8px;
+        }
+        .user-popup-text {
+            font-family: var(--font-literary);
+            font-size: 17px; line-height: 1.5;
+            color: #ddd; margin-bottom: 10px;
+        }
+        .user-popup-share {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 14px;
+            background: #25D366; color: #fff;
+            border: none; border-radius: 20px;
+            font-family: var(--font-ui); font-size: 11px; font-weight: 600;
+            cursor: pointer; text-decoration: none;
+            transition: var(--transition-smooth);
+        }
+        .user-popup-share:hover {
+            background: #1da851;
+            transform: translateY(-1px);
+        }
+        .user-popup-delete {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 6px 12px; margin-left: 6px;
+            background: transparent; color: #e74c3c;
+            border: 1px solid rgba(231,76,60,0.3); border-radius: 20px;
+            font-family: var(--font-ui); font-size: 11px;
+            cursor: pointer; transition: var(--transition-smooth);
+        }
+        .user-popup-delete:hover { background: rgba(231,76,60,0.15); }
+
+        /* Leaflet popup override for dark theme */
+        .leaflet-popup-content-wrapper {
+            background: rgba(15,15,25,0.95) !important;
+            border: 1px solid rgba(212,168,83,0.2) !important;
+            border-radius: 10px !important;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.6) !important;
+        }
+        .leaflet-popup-tip { background: rgba(15,15,25,0.95) !important; }
+        .leaflet-popup-close-button { color: #888 !important; font-size: 20px !important; }
+
+        /* ===== COMMUNITY COUNTER ===== */
+        .hud-btn-highlight {
+            background: rgba(46,204,113,0.1) !important;
+            border-color: rgba(46,204,113,0.3) !important;
+            color: #2ecc71 !important;
+        }
+        .hud-btn-highlight:hover {
+            background: rgba(46,204,113,0.2) !important;
+            border-color: rgba(46,204,113,0.5) !important;
+        }
+
         /* ===== RESPONSIVE ===== */
         @media (max-width: 900px) {
             #location-panel { width: calc(100vw - 30px); right: 15px; }
             #memory-panel { width: calc(100vw - 30px); left: 15px; }
             .intro-title { font-size: 28px; }
             .intro-subtitle { font-size: 14px; letter-spacing: 3px; }
+            #memory-modal { width: 95vw; }
         }
 
         /* ===== LEAFLET OVERRIDES ===== */
@@ -949,6 +1122,9 @@
         </div>
     </div>
     <div class="hud-actions">
+        <button class="hud-btn hud-btn-highlight" id="btn-add-user-memory" onclick="enableMemoryMode()">
+            <span>✍️</span> Hatıranı Bırak
+        </button>
         <button class="hud-btn" id="btn-collection" onclick="toggleMemoryPanel()">
             <span>📜</span> Hafıza Koleksiyonum
         </button>
@@ -997,6 +1173,51 @@
                 Henüz hafıza kartı toplamadın.<br>
                 <small>Haritadaki kıvılcımlara tıkla ve "Hafızaya Ekle" butonuna bas.</small>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== USER MEMORY MODAL ===== -->
+<div id="memory-modal-overlay">
+    <div id="memory-modal">
+        <div class="modal-header">
+            <h3>✍️ Hatıranı Bırak</h3>
+            <button class="modal-close" onclick="closeMemoryModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-hint">
+                Adana'ya dair bir hatıran, anın veya hikâyen varsa burada paylaş. 
+                Senin hatıran da bu kentin palimpsestine yeni bir satır ekleyecek...
+            </div>
+            <div class="modal-coord-info" id="modal-coord-info">
+                📍 Haritada seçilen konum: —
+            </div>
+            <div class="modal-field">
+                <label>👤 Adın veya Takma Adın</label>
+                <input type="text" id="um-name" placeholder="Ör: Ahmet Y." maxlength="50">
+            </div>
+            <div class="modal-field">
+                <label>📅 Bu hatıra hangi yıla ait?</label>
+                <input type="number" id="um-year" placeholder="Ör: 1985" min="1900" max="2025">
+            </div>
+            <div class="modal-field">
+                <label>🏷️ Hatıra Kategorisi</label>
+                <select id="um-category">
+                    <option value="personal">Kişisel Anı</option>
+                    <option value="family">Aile Hatırası</option>
+                    <option value="neighborhood">Mahalle Hikâyesi</option>
+                    <option value="food">Lezzet Hafızası</option>
+                    <option value="culture">Kültürel Anı</option>
+                    <option value="work">İş/Emek Hatırası</option>
+                </select>
+            </div>
+            <div class="modal-field">
+                <label>📝 Hatıran</label>
+                <textarea id="um-text" placeholder="Adana'ya dair hatıranı yaz... Bir sokak, bir koku, bir ses, bir yüz..." maxlength="500"></textarea>
+            </div>
+            <button class="btn-submit-memory" id="btn-submit-um" onclick="submitUserMemory()">
+                🕊️ Hatırayı Haritaya Bırak
+            </button>
         </div>
     </div>
 </div>
@@ -1709,6 +1930,177 @@ function showToast(msg) {
     toast.classList.add('show');
     setTimeout(() => toast.classList.remove('show'), 3500);
 }
+
+// ============================================================
+//  USER MEMORY SYSTEM — Hatıranı Bırak
+// ============================================================
+let memoryModeActive = false;
+let selectedCoords = null;
+let userMemories = [];
+let userMemoryMarkers = [];
+
+// Load saved memories from localStorage
+function loadUserMemories() {
+    try {
+        const saved = localStorage.getItem('adana_palimpsest_user_memories');
+        if (saved) {
+            userMemories = JSON.parse(saved);
+            userMemories.forEach(mem => addUserMemoryMarker(mem));
+        }
+    } catch(e) { console.log('Memory load error:', e); }
+}
+
+function saveUserMemories() {
+    try {
+        localStorage.setItem('adana_palimpsest_user_memories', JSON.stringify(userMemories));
+    } catch(e) { console.log('Memory save error:', e); }
+}
+
+function enableMemoryMode() {
+    memoryModeActive = true;
+    const btn = document.getElementById('btn-add-user-memory');
+    btn.innerHTML = '<span>📍</span> Haritaya Tıkla...';
+    btn.style.animation = 'markerPulse 1.5s infinite';
+    
+    // Close any open panels
+    if (locationPanelOpen) closeLocationPanel();
+    if (memoryPanelOpen) toggleMemoryPanel();
+    
+    showToast('📍 Hatıranı bırakmak istediğin noktaya haritada tıkla!');
+    
+    // Change cursor
+    document.getElementById('map').style.cursor = 'crosshair';
+}
+
+function disableMemoryMode() {
+    memoryModeActive = false;
+    const btn = document.getElementById('btn-add-user-memory');
+    btn.innerHTML = '<span>✍️</span> Hatıranı Bırak';
+    btn.style.animation = '';
+    document.getElementById('map').style.cursor = '';
+}
+
+function openMemoryModal(lat, lng) {
+    selectedCoords = { lat, lng };
+    document.getElementById('modal-coord-info').innerHTML = 
+        `📍 Seçilen konum: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+    document.getElementById('memory-modal-overlay').classList.add('open');
+    
+    // Clear form
+    document.getElementById('um-name').value = '';
+    document.getElementById('um-year').value = '';
+    document.getElementById('um-text').value = '';
+    document.getElementById('um-category').value = 'personal';
+}
+
+function closeMemoryModal() {
+    document.getElementById('memory-modal-overlay').classList.remove('open');
+    disableMemoryMode();
+    selectedCoords = null;
+}
+
+function submitUserMemory() {
+    const name = document.getElementById('um-name').value.trim();
+    const year = document.getElementById('um-year').value.trim();
+    const text = document.getElementById('um-text').value.trim();
+    const category = document.getElementById('um-category').value;
+    
+    if (!name || !text) {
+        showToast('⚠️ Lütfen adını ve hatıranı yaz.');
+        return;
+    }
+    
+    const categoryLabels = {
+        personal: 'Kişisel Anı',
+        family: 'Aile Hatırası',
+        neighborhood: 'Mahalle Hikâyesi',
+        food: 'Lezzet Hafızası',
+        culture: 'Kültürel Anı',
+        work: 'İş/Emek Hatırası'
+    };
+    
+    const memory = {
+        id: 'um_' + Date.now(),
+        name: name,
+        year: year || '—',
+        text: text,
+        category: category,
+        categoryLabel: categoryLabels[category],
+        lat: selectedCoords.lat,
+        lng: selectedCoords.lng,
+        timestamp: new Date().toISOString()
+    };
+    
+    userMemories.push(memory);
+    saveUserMemories();
+    addUserMemoryMarker(memory);
+    
+    closeMemoryModal();
+    showToast(`✨ "${name}" hatırası haritaya eklendi! Teşekkürler.`);
+}
+
+function addUserMemoryMarker(memory) {
+    if (!map) return;
+    
+    const icon = L.divIcon({
+        html: `<div class="user-memory-dot" title="${memory.name}"></div>`,
+        className: '',
+        iconSize: [14, 14],
+        iconAnchor: [7, 7]
+    });
+    
+    const marker = L.marker([memory.lat, memory.lng], { icon }).addTo(map);
+    
+    const shareUrl = 'https://akadirturhan01.github.io/adana-palimpsest/';
+    const shareText = `🏛️ Adana Kent Hafızası\n\n"${memory.text}"\n\n— ${memory.name} (${memory.year})\n📍 ${memory.categoryLabel}\n\n🗺️ Sen de hatıranı bırak:`;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText + '\n' + shareUrl)}`;
+    
+    const popupHtml = `
+        <div class="user-popup">
+            <div class="user-popup-name">✨ ${memory.name}</div>
+            <div class="user-popup-year">${memory.categoryLabel} · ${memory.year}</div>
+            <div class="user-popup-text">"${memory.text}"</div>
+            <a href="${whatsappUrl}" target="_blank" class="user-popup-share">
+                📲 WhatsApp'ta Paylaş
+            </a>
+            <button class="user-popup-delete" onclick="deleteUserMemory('${memory.id}')">
+                🗑️ Sil
+            </button>
+        </div>
+    `;
+    
+    marker.bindPopup(popupHtml, { maxWidth: 300 });
+    marker._memoryId = memory.id;
+    userMemoryMarkers.push(marker);
+}
+
+function deleteUserMemory(memId) {
+    userMemories = userMemories.filter(m => m.id !== memId);
+    saveUserMemories();
+    
+    const markerIdx = userMemoryMarkers.findIndex(m => m._memoryId === memId);
+    if (markerIdx !== -1) {
+        map.removeLayer(userMemoryMarkers[markerIdx]);
+        userMemoryMarkers.splice(markerIdx, 1);
+    }
+    
+    showToast('🗑️ Hatıra silindi.');
+}
+
+// Hook into map click for memory mode
+const origInitMap = initMap;
+initMap = function() {
+    origInitMap();
+    
+    map.on('click', function(e) {
+        if (memoryModeActive) {
+            openMemoryModal(e.latlng.lat, e.latlng.lng);
+        }
+    });
+    
+    // Load saved user memories
+    loadUserMemories();
+};
 
 </script>
 </body>
