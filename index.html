@@ -181,24 +181,35 @@
             backdrop-filter: var(--blur-glass);
         }
         
-        .intro-purpose {
-            font-family: var(--font-body);
-            font-size: 15px; line-height: 1.6;
-            color: var(--text-primary);
-            text-align: left;
-            background: rgba(15, 15, 25, 0.7);
-            padding: 20px 25px;
+        .intro-purpose-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            background: rgba(15, 15, 25, 0.6);
+            padding: 30px 40px;
             border-radius: 12px;
-            border: 1px solid var(--border-glow);
-            box-shadow: 0 4px 15px rgba(212, 168, 83, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             margin-bottom: 30px;
+            text-align: left;
+            max-width: 900px;
+            width: 100%;
         }
-        .intro-purpose strong {
-            color: var(--amber-bright);
-            font-family: var(--font-ui);
-            text-transform: uppercase;
+        
+        .purpose-card h3 {
+            color: var(--amber-glow);
+            font-family: var(--font-display);
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
             letter-spacing: 1px;
+        }
+        
+        .purpose-card p {
+            font-family: var(--font-ui);
             font-size: 13px;
+            line-height: 1.6;
+            color: var(--text-secondary);
         }
 
         #btn-start-game {
@@ -1104,8 +1115,15 @@
             <span>Rolün: Siber-Flâneur — Aktif Bellek İnşacısı</span>
         </div>
         
-        <div class="intro-purpose">
-            <strong>Amaç ve Kapsam:</strong> Bu proje, Adana'nın kentsel dönüşüm sürecindeki hafıza kaybına karşı dijital bir direniş alanı oluşturmayı amaçlar. 19. yüzyıldan günümüze uzanan mimari, kültürel ve edebi katmanların etkileşimli bir CBS (Coğrafi Bilgi Sistemleri) altyapısıyla sunulmasını kapsar.
+        <div class="intro-purpose-grid">
+            <div class="purpose-card">
+                <h3>Projenin Amacı</h3>
+                <p>Adana'nın kentsel dönüşüm ve sanayileşme süreçlerinde fiziksel olarak silinen, ancak kolektif bellekte yaşamaya devam eden katmanlarını dijital bir "palimpsest" mantığıyla yeniden kurgulamak. Amacımız, kentsel amneziye karşı dijital bir direniş alanı oluşturarak, kentin kayıp hafızasını interaktif bir deneyime dönüştürmektir.</p>
+            </div>
+            <div class="purpose-card">
+                <h3>Kapsam ve Yöntem</h3>
+                <p>19. yüzyıl sonundan günümüze kadar uzanan süreçte; Adana'nın seçili mimari yapıları, tarihsel olayları ve edebi anlatıları CBS (Coğrafi Bilgi Sistemleri) tabanlı bir zaman çizelgesi üzerinde birleştirilmiştir. Proje, hem akademik bir "Tasarım Odaklı Araştırma" ürünü hem de kentsel arşiv niteliği taşımaktadır.</p>
+            </div>
         </div>
         <br>
         <button id="btn-start-game" onclick="startGame()">Yürüyüşe Başla</button>
