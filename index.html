@@ -177,8 +177,28 @@
             color: var(--cyan-glow);
             letter-spacing: 2px;
             text-transform: uppercase;
-            margin-bottom: 35px;
+            margin-bottom: 25px;
             backdrop-filter: var(--blur-glass);
+        }
+        
+        .intro-purpose {
+            font-family: var(--font-body);
+            font-size: 15px; line-height: 1.6;
+            color: var(--text-primary);
+            text-align: left;
+            background: rgba(15, 15, 25, 0.7);
+            padding: 20px 25px;
+            border-radius: 12px;
+            border: 1px solid var(--border-glow);
+            box-shadow: 0 4px 15px rgba(212, 168, 83, 0.1);
+            margin-bottom: 30px;
+        }
+        .intro-purpose strong {
+            color: var(--amber-bright);
+            font-family: var(--font-ui);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 13px;
         }
 
         #btn-start-game {
@@ -1082,6 +1102,10 @@
         <div class="intro-role-badge">
             <span>⚡</span>
             <span>Rolün: Siber-Flâneur — Aktif Bellek İnşacısı</span>
+        </div>
+        
+        <div class="intro-purpose">
+            <strong>Amaç ve Kapsam:</strong> Bu proje, Adana'nın kentsel dönüşüm sürecindeki hafıza kaybına karşı dijital bir direniş alanı oluşturmayı amaçlar. 19. yüzyıldan günümüze uzanan mimari, kültürel ve edebi katmanların etkileşimli bir CBS (Coğrafi Bilgi Sistemleri) altyapısıyla sunulmasını kapsar.
         </div>
         <br>
         <button id="btn-start-game" onclick="startGame()">Yürüyüşe Başla</button>
